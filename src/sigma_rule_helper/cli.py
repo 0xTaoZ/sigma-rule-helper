@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import argparse
 
+from sigma_rule_helper.files import iter_rule_files
+from sigma_rule_helper.loader import load_rules
+
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
@@ -23,6 +26,8 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
-    parser.parse_args(argv)
-    parser.print_help()
+    args = parser.parse_args(argv)
+    files = iter_rule_files(args.paths)
+    rules = load_rules(files)
+    print(f"loaded {len(rules)} rule file(s)")
     return 0
