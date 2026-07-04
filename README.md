@@ -43,3 +43,5 @@ Early learning project. The CLI and checks are intentionally small so each behav
 ## Current checks
 
 The repository includes a small unittest suite and a GitHub Actions workflow that runs it on push and pull request events.
+
+See `docs/rule-review-notes.md` for the small review checklist this tool is based on.
