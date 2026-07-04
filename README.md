@@ -26,6 +26,15 @@ sigma-rule-helper check samples/
 - MITRE ATT&CK tags when present
 - readable output for quick rule review
 
+## Development
+
+```bash
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -e .
+PYTHONPATH=src python -m unittest discover -s tests
+```
+
 ## Project status
 
 Early learning project. The CLI and checks are intentionally small so each behavior can be tested and understood.
