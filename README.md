@@ -39,3 +39,7 @@ PYTHONPATH=src python -m unittest discover -s tests
 ## Project status
 
 Early learning project. The CLI and checks are intentionally small so each behavior can be tested and understood.
+
+## Current checks
+
+The repository includes a small unittest suite and a GitHub Actions workflow that runs it on push and pull request events.
