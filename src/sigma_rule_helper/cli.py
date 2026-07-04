@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 
+from sigma_rule_helper.checks import check_rule
 from sigma_rule_helper.files import iter_rule_files
 from sigma_rule_helper.loader import load_rules
 
@@ -29,5 +30,17 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     files = iter_rule_files(args.paths)
     rules = load_rules(files)
+    if args.command == "check":
+        total_findings = 0
+        for rule in rules:
+            findings = check_rule(rule)
+            if findings:
+                print(rule.path)
+                for finding in findings:
+                    print(f"  {finding.severity}: {finding.code}: {finding.message}")
+            total_findings += len(findings)
+        print(f"checked {len(rules)} rule file(s), found {total_findings} issue(s)")
+        return 1 if any(check_rule(rule) for rule in rules) else 0
+
     print(f"loaded {len(rules)} rule file(s)")
     return 0

@@ -1,0 +1,71 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Any
+
+from sigma_rule_helper.loader import LoadedRule
+
+REQUIRED_FIELDS = ("title", "id", "status", "logsource", "detection", "level")
+KNOWN_LEVELS = {"informational", "low", "medium", "high", "critical"}
+KNOWN_STATUSES = {"experimental", "test", "stable", "deprecated", "unsupported"}
+
+
+@dataclass(frozen=True)
+class Finding:
+    severity: str
+    code: str
+    message: str
+
+
+def check_rule(rule: LoadedRule) -> list[Finding]:
+    findings: list[Finding] = []
+    data = rule.data
+
+    for field in REQUIRED_FIELDS:
+        if field not in data:
+            findings.append(
+                Finding("error", "missing-field", f"missing required field: {field}")
+            )
+
+    status = data.get("status")
+    if isinstance(status, str) and status not in KNOWN_STATUSES:
+        findings.append(Finding("warning", "unknown-status", f"unknown status: {status}"))
+
+    level = data.get("level")
+    if isinstance(level, str) and level.lower() not in KNOWN_LEVELS:
+        findings.append(Finding("warning", "unknown-level", f"unknown level: {level}"))
+
+    findings.extend(_check_logsource(data.get("logsource")))
+    findings.extend(_check_detection(data.get("detection")))
+    return findings
+
+
+def _check_logsource(logsource: Any) -> list[Finding]:
+    if logsource is None:
+        return []
+    if not isinstance(logsource, dict):
+        return [Finding("error", "bad-logsource", "logsource should be a mapping")]
+    if not any(key in logsource for key in ("product", "service", "category")):
+        return [
+            Finding(
+                "warning",
+                "empty-logsource",
+                "logsource should include product, service, or category",
+            )
+        ]
+    return []
+
+
+def _check_detection(detection: Any) -> list[Finding]:
+    if detection is None:
+        return []
+    if not isinstance(detection, dict):
+        return [Finding("error", "bad-detection", "detection should be a mapping")]
+    if "condition" not in detection:
+        return [Finding("error", "missing-condition", "detection missing condition")]
+    selectors = [key for key in detection if key != "condition"]
+    if not selectors:
+        return [
+            Finding("warning", "no-selectors", "detection has condition but no selectors")
+        ]
+    return []
