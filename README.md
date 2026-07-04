@@ -1,0 +1,25 @@
+# sigma-rule-helper
+
+Small command line helper for reviewing Sigma detection rules in a lab or learning repo.
+
+The first goal is practical and narrow: load one or more Sigma YAML files, report missing core fields, and print a compact summary that is easy to read during rule review.
+
+This is not a replacement for the official Sigma tooling. It is a beginner-friendly project for learning how detection rules are structured and how simple validation tools are built.
+
+## Planned workflow
+
+```bash
+sigma-rule-helper check rules/
+sigma-rule-helper summary rules/
+```
+
+## What it checks
+
+- required top-level fields such as `title`, `id`, `status`, `logsource`, `detection`, and `level`
+- basic detection shape
+- MITRE ATT&CK tags when present
+- readable output for quick rule review
+
+## Project status
+
+Early learning project. The CLI and checks are intentionally small so each behavior can be tested and understood.
