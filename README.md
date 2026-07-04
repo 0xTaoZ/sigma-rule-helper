@@ -11,6 +11,7 @@ This is not a replacement for the official Sigma tooling. It is a beginner-frien
 ```bash
 sigma-rule-helper check rules/
 sigma-rule-helper summary rules/
+sigma-rule-helper summary --format json rules/
 ```
 
 Try the sample rule set:
