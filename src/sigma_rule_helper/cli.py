@@ -5,6 +5,13 @@ import argparse
 from sigma_rule_helper.checks import check_rule
 from sigma_rule_helper.files import iter_rule_files
 from sigma_rule_helper.loader import load_rules
+from sigma_rule_helper.summary import (
+    rule_level,
+    rule_logsource,
+    rule_status,
+    rule_title,
+    summarize_counts,
+)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -42,5 +49,16 @@ def main(argv: list[str] | None = None) -> int:
         print(f"checked {len(rules)} rule file(s), found {total_findings} issue(s)")
         return 1 if any(check_rule(rule) for rule in rules) else 0
 
-    print(f"loaded {len(rules)} rule file(s)")
+    for rule in rules:
+        print(
+            f"{rule.path}: {rule_title(rule)} "
+            f"[level={rule_level(rule)} status={rule_status(rule)} "
+            f"logsource={rule_logsource(rule)}]"
+        )
+    for line in summarize_counts(rules):
+        print(line)
     return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
