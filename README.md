@@ -13,6 +13,12 @@ sigma-rule-helper check rules/
 sigma-rule-helper summary rules/
 ```
 
+Try the sample rule set:
+
+```bash
+sigma-rule-helper check samples/
+```
+
 ## What it checks
 
 - required top-level fields such as `title`, `id`, `status`, `logsource`, `detection`, and `level`
