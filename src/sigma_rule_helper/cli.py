@@ -9,6 +9,7 @@ from sigma_rule_helper.loader import load_rules
 from sigma_rule_helper.summary import (
     rule_level,
     rule_logsource,
+    rule_attack_techniques,
     rule_status,
     rule_title,
     summarize_counts,
@@ -68,7 +69,8 @@ def main(argv: list[str] | None = None) -> int:
         print(
             f"{rule.path}: {rule_title(rule)} "
             f"[level={rule_level(rule)} status={rule_status(rule)} "
-            f"logsource={rule_logsource(rule)}]"
+            f"logsource={rule_logsource(rule)} "
+            f"attack={','.join(rule_attack_techniques(rule)) or 'none'}]"
         )
     for line in summarize_counts(rules):
         print(line)
@@ -102,6 +104,7 @@ def _summary_json(rules):
                 "level": rule_level(rule),
                 "status": rule_status(rule),
                 "logsource": rule_logsource(rule),
+                "attack_techniques": rule_attack_techniques(rule),
             }
             for rule in rules
         ],

@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 
 from sigma_rule_helper.loader import LoadedRule
-from sigma_rule_helper.summary import rule_logsource, summarize_counts
+from sigma_rule_helper.summary import rule_attack_techniques, rule_logsource, summarize_counts
 
 
 class SummaryTests(unittest.TestCase):
@@ -27,6 +27,14 @@ class SummaryTests(unittest.TestCase):
         self.assertIn("rules: 2", lines)
         self.assertIn("levels: high=1, medium=1", lines)
         self.assertIn("statuses: experimental=1, stable=1", lines)
+
+    def test_attack_techniques_are_normalized(self) -> None:
+        rule = LoadedRule(
+            path=Path("rule.yml"),
+            data={"tags": ["attack.credential_access", "Attack.T1110"]},
+        )
+
+        self.assertEqual(rule_attack_techniques(rule), ["attack.t1110"])
 
 
 if __name__ == "__main__":

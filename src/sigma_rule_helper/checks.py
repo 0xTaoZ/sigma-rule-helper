@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from sigma_rule_helper.loader import LoadedRule
+from sigma_rule_helper.tags import attack_tags, attack_techniques
 
 REQUIRED_FIELDS = ("title", "id", "status", "logsource", "detection", "level")
 KNOWN_LEVELS = {"informational", "low", "medium", "high", "critical"}
@@ -37,6 +38,14 @@ def check_rule(rule: LoadedRule) -> list[Finding]:
 
     findings.extend(_check_logsource(data.get("logsource")))
     findings.extend(_check_detection(data.get("detection")))
+    if attack_tags(data) and not attack_techniques(data):
+        findings.append(
+            Finding(
+                "warning",
+                "missing-attack-technique",
+                "ATT&CK tags found but no technique tag such as attack.t1110",
+            )
+        )
     return findings
 
 

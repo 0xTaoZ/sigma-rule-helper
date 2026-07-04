@@ -4,6 +4,7 @@ from collections import Counter
 from typing import Any
 
 from sigma_rule_helper.loader import LoadedRule
+from sigma_rule_helper.tags import attack_techniques
 
 
 def rule_title(rule: LoadedRule) -> str:
@@ -31,6 +32,10 @@ def rule_logsource(rule: LoadedRule) -> str:
         _text_field(logsource.get("category"), ""),
     ]
     return "/".join(part for part in parts if part) or "unknown"
+
+
+def rule_attack_techniques(rule: LoadedRule) -> list[str]:
+    return attack_techniques(rule.data)
 
 
 def summarize_counts(rules: list[LoadedRule]) -> list[str]:

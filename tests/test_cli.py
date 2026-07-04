@@ -19,6 +19,7 @@ class CliTests(unittest.TestCase):
         payload = json.loads(output.getvalue())
         self.assertEqual(payload["rules"][0]["title"], "Windows Failed Logon Spike")
         self.assertEqual(payload["rules"][0]["level"], "medium")
+        self.assertEqual(payload["rules"][0]["attack_techniques"], ["attack.t1110"])
 
 
 if __name__ == "__main__":
