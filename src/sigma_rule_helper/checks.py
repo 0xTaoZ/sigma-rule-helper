@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import uuid
 from dataclasses import dataclass
 from typing import Any
 
@@ -31,6 +32,9 @@ def check_rule(rule: LoadedRule) -> list[Finding]:
     status = data.get("status")
     if isinstance(status, str) and status not in KNOWN_STATUSES:
         findings.append(Finding("warning", "unknown-status", f"unknown status: {status}"))
+
+    if "id" in data:
+        findings.extend(_check_id(data["id"]))
 
     level = data.get("level")
     if isinstance(level, str) and level.lower() not in KNOWN_LEVELS:
@@ -77,4 +81,14 @@ def _check_detection(detection: Any) -> list[Finding]:
         return [
             Finding("warning", "no-selectors", "detection has condition but no selectors")
         ]
+    return []
+
+
+def _check_id(rule_id: Any) -> list[Finding]:
+    if not isinstance(rule_id, str):
+        return [Finding("error", "invalid-id-type", "id must be a string")]
+    try:
+        uuid.UUID(rule_id)
+    except ValueError:
+        return [Finding("error", "invalid-id-format", "id must be a valid UUID")]
     return []

@@ -42,6 +42,23 @@ class CheckRuleTests(unittest.TestCase):
         self.assertIn("bad-logsource", codes)
         self.assertIn("no-selectors", codes)
 
+    def test_invalid_id_format_reports_finding(self) -> None:
+        rule = LoadedRule(
+            path=Path("bad_id.yml"),
+            data={
+                "title": "Bad ID",
+                "id": "not-a-uuid",
+                "status": "stable",
+                "logsource": {"product": "windows", "service": "security"},
+                "detection": {"selection": {"EventID": 4625}, "condition": "selection"},
+                "level": "medium",
+            },
+        )
+
+        codes = {finding.code for finding in check_rule(rule)}
+
+        self.assertIn("invalid-id-format", codes)
+
 
 if __name__ == "__main__":
     unittest.main()
