@@ -7,7 +7,7 @@ This project uses a small checklist for reading Sigma rules. The checklist is in
 Check that the rule has the core metadata:
 
 - `title` explains the detection idea in plain language
-- `id` is present and unique
+- `id` is present, unique, and formatted as a valid UUID
 - `status` is honest about maturity
 - `level` matches expected impact
 - `logsource` points to the product, service, or category
@@ -26,4 +26,4 @@ ATT&CK tags are useful when they are specific. A tactic tag such as `attack.cred
 
 ## Useful next checks
 
-Future versions could check UUID format, date format, duplicate rule IDs, and whether the `condition` references selectors that actually exist.
+Future versions could check date format, duplicate rule IDs, and whether the `condition` references selectors that actually exist.
