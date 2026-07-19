@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import uuid
 from dataclasses import dataclass
 from typing import Any
@@ -10,6 +11,7 @@ from sigma_rule_helper.tags import attack_tags, attack_techniques
 REQUIRED_FIELDS = ("title", "id", "status", "logsource", "detection", "level")
 KNOWN_LEVELS = {"informational", "low", "medium", "high", "critical"}
 KNOWN_STATUSES = {"experimental", "test", "stable", "deprecated", "unsupported"}
+CONDITION_KEYWORDS = {"and", "or", "not", "near", "of", "all", "them"}
 
 
 @dataclass(frozen=True)
@@ -81,7 +83,46 @@ def _check_detection(detection: Any) -> list[Finding]:
         return [
             Finding("warning", "no-selectors", "detection has condition but no selectors")
         ]
-    return []
+    findings: list[Finding] = []
+    condition = detection["condition"]
+    if isinstance(condition, str):
+        known_selectors = {key for key in selectors if isinstance(key, str)}
+        for name in _missing_condition_selectors(condition, known_selectors):
+            findings.append(
+                Finding(
+                    "error",
+                    "missing-condition-selector",
+                    f"condition references missing selector: {name}",
+                )
+            )
+    return findings
+
+
+def _missing_condition_selectors(condition: str, known_selectors: set[str]) -> list[str]:
+    missing: list[str] = []
+    wildcard_prefixes = re.findall(r"\b([A-Za-z_][A-Za-z0-9_]*)\*", condition)
+    for prefix in wildcard_prefixes:
+        if not any(selector.startswith(prefix) for selector in known_selectors):
+            missing.append(f"{prefix}*")
+
+    for name in _condition_selector_names(condition):
+        if name in known_selectors:
+            continue
+        if any(name == prefix for prefix in wildcard_prefixes):
+            continue
+        if name not in missing:
+            missing.append(name)
+    return missing
+
+
+def _condition_selector_names(condition: str) -> list[str]:
+    names: list[str] = []
+    for token in re.findall(r"[A-Za-z_][A-Za-z0-9_]*", condition):
+        if token.lower() in CONDITION_KEYWORDS:
+            continue
+        if token not in names:
+            names.append(token)
+    return names
 
 
 def _check_id(rule_id: Any) -> list[Finding]:

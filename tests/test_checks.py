@@ -59,6 +59,54 @@ class CheckRuleTests(unittest.TestCase):
 
         self.assertIn("invalid-id-format", codes)
 
+    def test_condition_references_missing_selector(self) -> None:
+        rule = LoadedRule(
+            path=Path("missing_selector.yml"),
+            data={
+                "title": "Missing Selector",
+                "id": "22222222-2222-4222-8222-222222222222",
+                "status": "test",
+                "logsource": {"product": "windows", "service": "security"},
+                "detection": {
+                    "selection": {"EventID": 4625},
+                    "condition": "selection and filter",
+                },
+                "level": "medium",
+            },
+        )
+
+        findings = check_rule(rule)
+
+        self.assertIn(
+            "missing-condition-selector",
+            {finding.code for finding in findings},
+        )
+        self.assertIn(
+            "filter",
+            {finding.message.rsplit(": ", maxsplit=1)[-1] for finding in findings},
+        )
+
+    def test_condition_wildcard_prefix_matches_selectors(self) -> None:
+        rule = LoadedRule(
+            path=Path("wildcard.yml"),
+            data={
+                "title": "Wildcard Condition",
+                "id": "33333333-3333-4333-8333-333333333333",
+                "status": "test",
+                "logsource": {"product": "windows", "service": "security"},
+                "detection": {
+                    "selection_process": {"Image|endswith": "\\cmd.exe"},
+                    "selection_parent": {"ParentImage|endswith": "\\powershell.exe"},
+                    "condition": "1 of selection_*",
+                },
+                "level": "medium",
+            },
+        )
+
+        codes = {finding.code for finding in check_rule(rule)}
+
+        self.assertNotIn("missing-condition-selector", codes)
+
 
 if __name__ == "__main__":
     unittest.main()

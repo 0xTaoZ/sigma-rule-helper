@@ -18,6 +18,7 @@ Read the `detection` section like a small query:
 
 - selectors describe the fields and values being matched
 - `condition` ties selectors together
+- each selector named in `condition` exists in the same `detection` block
 - obvious false positives are documented
 
 ## ATT&CK pass
@@ -26,4 +27,4 @@ ATT&CK tags are useful when they are specific. A tactic tag such as `attack.cred
 
 ## Useful next checks
 
-Future versions could check date format, duplicate rule IDs, and whether the `condition` references selectors that actually exist.
+Future versions could check date format and duplicate rule IDs.
