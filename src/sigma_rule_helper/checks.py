@@ -84,6 +84,15 @@ def _check_detection(detection: Any) -> list[Finding]:
             Finding("warning", "no-selectors", "detection has condition but no selectors")
         ]
     findings: list[Finding] = []
+    for selector in selectors:
+        if detection[selector] in ({}, [], None):
+            findings.append(
+                Finding(
+                    "warning",
+                    "empty-selector",
+                    f"detection selector has no fields: {selector}",
+                )
+            )
     condition = detection["condition"]
     if isinstance(condition, str):
         known_selectors = {key for key in selectors if isinstance(key, str)}

@@ -107,6 +107,30 @@ class CheckRuleTests(unittest.TestCase):
 
         self.assertNotIn("missing-condition-selector", codes)
 
+    def test_empty_selector_reports_finding(self) -> None:
+        rule = LoadedRule(
+            path=Path("empty_selector.yml"),
+            data={
+                "title": "Empty Selector",
+                "id": "44444444-4444-4444-8444-444444444444",
+                "status": "test",
+                "logsource": {"product": "windows", "service": "security"},
+                "detection": {
+                    "selection": {},
+                    "condition": "selection",
+                },
+                "level": "medium",
+            },
+        )
+
+        findings = check_rule(rule)
+
+        self.assertIn("empty-selector", {finding.code for finding in findings})
+        self.assertIn(
+            "selection",
+            {finding.message.rsplit(": ", maxsplit=1)[-1] for finding in findings},
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

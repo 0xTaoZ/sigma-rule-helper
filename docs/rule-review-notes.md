@@ -17,6 +17,7 @@ Check that the rule has the core metadata:
 Read the `detection` section like a small query:
 
 - selectors describe the fields and values being matched
+- selectors should not be empty placeholders
 - `condition` ties selectors together
 - each selector named in `condition` exists in the same `detection` block
 - obvious false positives are documented
