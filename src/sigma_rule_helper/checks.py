@@ -85,12 +85,21 @@ def _check_detection(detection: Any) -> list[Finding]:
         ]
     findings: list[Finding] = []
     for selector in selectors:
-        if detection[selector] in ({}, [], None):
+        selector_body = detection[selector]
+        if selector_body in ({}, [], None):
             findings.append(
                 Finding(
                     "warning",
                     "empty-selector",
                     f"detection selector has no fields: {selector}",
+                )
+            )
+        elif not isinstance(selector_body, (dict, list)):
+            findings.append(
+                Finding(
+                    "warning",
+                    "bad-selector",
+                    f"detection selector should be a mapping or list: {selector}",
                 )
             )
     condition = detection["condition"]

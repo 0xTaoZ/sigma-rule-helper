@@ -25,6 +25,7 @@ sigma-rule-helper check samples/
 - required top-level fields such as `title`, `id`, `status`, `logsource`, `detection`, and `level`
 - basic detection shape
 - empty detection selectors
+- selector bodies that are scalar values instead of mappings or lists
 - condition references to missing selectors
 - MITRE ATT&CK tags when present
 - readable output for quick rule review

@@ -131,6 +131,30 @@ class CheckRuleTests(unittest.TestCase):
             {finding.message.rsplit(": ", maxsplit=1)[-1] for finding in findings},
         )
 
+    def test_selector_with_scalar_body_reports_finding(self) -> None:
+        rule = LoadedRule(
+            path=Path("scalar_selector.yml"),
+            data={
+                "title": "Scalar Selector",
+                "id": "55555555-5555-4555-8555-555555555555",
+                "status": "test",
+                "logsource": {"product": "windows", "service": "security"},
+                "detection": {
+                    "selection": 4625,
+                    "condition": "selection",
+                },
+                "level": "medium",
+            },
+        )
+
+        findings = check_rule(rule)
+
+        self.assertIn("bad-selector", {finding.code for finding in findings})
+        self.assertIn(
+            "selection",
+            {finding.message.rsplit(": ", maxsplit=1)[-1] for finding in findings},
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

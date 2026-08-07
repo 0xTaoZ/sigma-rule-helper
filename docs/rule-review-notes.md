@@ -18,6 +18,7 @@ Read the `detection` section like a small query:
 
 - selectors describe the fields and values being matched
 - selectors should not be empty placeholders
+- selector bodies should be mappings or lists, not single scalar values
 - `condition` ties selectors together
 - each selector named in `condition` exists in the same `detection` block
 - obvious false positives are documented
@@ -28,4 +29,4 @@ ATT&CK tags are useful when they are specific. A tactic tag such as `attack.cred
 
 ## Useful next checks
 
-Future versions could check date format and duplicate rule IDs.
+Future versions could check date format, duplicate rule IDs, or suspiciously broad wildcard conditions.

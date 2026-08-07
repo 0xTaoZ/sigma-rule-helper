@@ -3,5 +3,6 @@ status: maybe
 logsource: []
 detection:
   selection: {}
+  selection_scalar: 4625
   condition: selection and filter
 level: noisy
