@@ -22,6 +22,7 @@ Read the `detection` section like a small query:
 - `condition` ties selectors together
 - each selector named in `condition` exists in the same `detection` block
 - obvious false positives are documented
+- `falsepositives` is present and not just an empty placeholder
 
 ## ATT&CK pass
 

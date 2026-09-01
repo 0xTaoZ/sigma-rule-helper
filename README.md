@@ -27,6 +27,7 @@ sigma-rule-helper check samples/
 - empty detection selectors
 - selector bodies that are scalar values instead of mappings or lists
 - condition references to missing selectors
+- missing or empty `falsepositives` notes
 - MITRE ATT&CK tags when present
 - readable output for quick rule review
 

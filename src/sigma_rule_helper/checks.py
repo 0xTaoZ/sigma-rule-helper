@@ -42,6 +42,15 @@ def check_rule(rule: LoadedRule) -> list[Finding]:
     if isinstance(level, str) and level.lower() not in KNOWN_LEVELS:
         findings.append(Finding("warning", "unknown-level", f"unknown level: {level}"))
 
+    if data.get("falsepositives") in (None, []):
+        findings.append(
+            Finding(
+                "warning",
+                "missing-falsepositives",
+                "falsepositives should describe expected benign matches",
+            )
+        )
+
     findings.extend(_check_logsource(data.get("logsource")))
     findings.extend(_check_detection(data.get("detection")))
     if attack_tags(data) and not attack_techniques(data):

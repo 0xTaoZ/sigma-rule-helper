@@ -17,6 +17,7 @@ class CheckRuleTests(unittest.TestCase):
                 "status": "experimental",
                 "logsource": {"product": "windows", "service": "security"},
                 "detection": {"selection": {"EventID": 4625}, "condition": "selection"},
+                "falsepositives": ["mistyped passwords"],
                 "level": "medium",
             },
         )
@@ -41,6 +42,41 @@ class CheckRuleTests(unittest.TestCase):
         self.assertIn("unknown-status", codes)
         self.assertIn("bad-logsource", codes)
         self.assertIn("no-selectors", codes)
+
+    def test_missing_falsepositives_reports_finding(self) -> None:
+        rule = LoadedRule(
+            path=Path("missing_falsepositives.yml"),
+            data={
+                "title": "Missing False Positives",
+                "id": "66666666-6666-4666-8666-666666666666",
+                "status": "test",
+                "logsource": {"product": "windows", "service": "security"},
+                "detection": {"selection": {"EventID": 4625}, "condition": "selection"},
+                "level": "medium",
+            },
+        )
+
+        findings = check_rule(rule)
+
+        self.assertIn("missing-falsepositives", {finding.code for finding in findings})
+
+    def test_empty_falsepositives_reports_finding(self) -> None:
+        rule = LoadedRule(
+            path=Path("empty_falsepositives.yml"),
+            data={
+                "title": "Empty False Positives",
+                "id": "77777777-7777-4777-8777-777777777777",
+                "status": "test",
+                "logsource": {"product": "windows", "service": "security"},
+                "detection": {"selection": {"EventID": 4625}, "condition": "selection"},
+                "falsepositives": [],
+                "level": "medium",
+            },
+        )
+
+        findings = check_rule(rule)
+
+        self.assertIn("missing-falsepositives", {finding.code for finding in findings})
 
     def test_invalid_id_format_reports_finding(self) -> None:
         rule = LoadedRule(
