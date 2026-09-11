@@ -4,5 +4,5 @@ logsource: []
 detection:
   selection: {}
   selection_scalar: 4625
-  condition: selection and filter
+  condition: 1 of them and filter
 level: noisy

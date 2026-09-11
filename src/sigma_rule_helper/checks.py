@@ -113,6 +113,14 @@ def _check_detection(detection: Any) -> list[Finding]:
             )
     condition = detection["condition"]
     if isinstance(condition, str):
+        if _uses_broad_them_condition(condition):
+            findings.append(
+                Finding(
+                    "warning",
+                    "broad-condition",
+                    "condition uses 'them'; name selector prefixes for clearer scope",
+                )
+            )
         known_selectors = {key for key in selectors if isinstance(key, str)}
         for name in _missing_condition_selectors(condition, known_selectors):
             findings.append(
@@ -123,6 +131,10 @@ def _check_detection(detection: Any) -> list[Finding]:
                 )
             )
     return findings
+
+
+def _uses_broad_them_condition(condition: str) -> bool:
+    return bool(re.search(r"\b(?:all|\d+)\s+of\s+them\b", condition, re.IGNORECASE))
 
 
 def _missing_condition_selectors(condition: str, known_selectors: set[str]) -> list[str]:

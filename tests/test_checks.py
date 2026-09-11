@@ -143,6 +143,27 @@ class CheckRuleTests(unittest.TestCase):
 
         self.assertNotIn("missing-condition-selector", codes)
 
+    def test_broad_them_condition_reports_finding(self) -> None:
+        rule = LoadedRule(
+            path=Path("broad_condition.yml"),
+            data={
+                "title": "Broad Condition",
+                "id": "88888888-8888-4888-8888-888888888888",
+                "status": "test",
+                "logsource": {"product": "windows", "service": "security"},
+                "detection": {
+                    "selection_process": {"Image|endswith": "\\cmd.exe"},
+                    "filter_admin": {"User": "admin"},
+                    "condition": "1 of them",
+                },
+                "level": "medium",
+            },
+        )
+
+        codes = {finding.code for finding in check_rule(rule)}
+
+        self.assertIn("broad-condition", codes)
+
     def test_empty_selector_reports_finding(self) -> None:
         rule = LoadedRule(
             path=Path("empty_selector.yml"),
