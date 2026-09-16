@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 import uuid
 from dataclasses import dataclass
+from datetime import date, datetime
 from typing import Any
 
 from sigma_rule_helper.loader import LoadedRule
@@ -37,6 +38,7 @@ def check_rule(rule: LoadedRule) -> list[Finding]:
 
     if "id" in data:
         findings.extend(_check_id(data["id"]))
+    findings.extend(_check_rule_dates(data))
 
     level = data.get("level")
     if isinstance(level, str) and level.lower() not in KNOWN_LEVELS:
@@ -172,3 +174,30 @@ def _check_id(rule_id: Any) -> list[Finding]:
     except ValueError:
         return [Finding("error", "invalid-id-format", "id must be a valid UUID")]
     return []
+
+
+def _check_rule_dates(data: dict[str, Any]) -> list[Finding]:
+    findings: list[Finding] = []
+    for field in ("date", "modified"):
+        value = data.get(field)
+        if value is None or isinstance(value, date):
+            continue
+        if not isinstance(value, str) or not _is_sigma_date(value):
+            findings.append(
+                Finding(
+                    "warning",
+                    "invalid-date-format",
+                    f"{field} should use YYYY/MM/DD format",
+                )
+            )
+    return findings
+
+
+def _is_sigma_date(value: str) -> bool:
+    if not re.fullmatch(r"\d{4}/\d{2}/\d{2}", value):
+        return False
+    try:
+        datetime.strptime(value, "%Y/%m/%d")
+    except ValueError:
+        return False
+    return True

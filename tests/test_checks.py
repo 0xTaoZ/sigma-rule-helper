@@ -95,6 +95,33 @@ class CheckRuleTests(unittest.TestCase):
 
         self.assertIn("invalid-id-format", codes)
 
+    def test_invalid_date_format_reports_finding(self) -> None:
+        rule = LoadedRule(
+            path=Path("bad_date.yml"),
+            data={
+                "title": "Bad Date",
+                "id": "99999999-9999-4999-8999-999999999999",
+                "status": "stable",
+                "date": "2026-09-17",
+                "modified": "2026/13/17",
+                "logsource": {"product": "windows", "service": "security"},
+                "detection": {"selection": {"EventID": 4625}, "condition": "selection"},
+                "falsepositives": ["lab testing"],
+                "level": "medium",
+            },
+        )
+
+        findings = check_rule(rule)
+
+        self.assertEqual(
+            ["invalid-date-format", "invalid-date-format"],
+            [finding.code for finding in findings],
+        )
+        self.assertEqual(
+            {"date should use YYYY/MM/DD format", "modified should use YYYY/MM/DD format"},
+            {finding.message for finding in findings},
+        )
+
     def test_condition_references_missing_selector(self) -> None:
         rule = LoadedRule(
             path=Path("missing_selector.yml"),

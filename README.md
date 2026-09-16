@@ -23,6 +23,7 @@ sigma-rule-helper check samples/
 ## What it checks
 
 - required top-level fields such as `title`, `id`, `status`, `logsource`, `detection`, and `level`
+- Sigma-style `date` and `modified` values
 - basic detection shape
 - empty detection selectors
 - selector bodies that are scalar values instead of mappings or lists

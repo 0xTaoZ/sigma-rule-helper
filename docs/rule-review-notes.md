@@ -9,6 +9,7 @@ Check that the rule has the core metadata:
 - `title` explains the detection idea in plain language
 - `id` is present, unique, and formatted as a valid UUID
 - `status` is honest about maturity
+- `date` and `modified` use the Sigma `YYYY/MM/DD` style
 - `level` matches expected impact
 - `logsource` points to the product, service, or category
 
@@ -30,4 +31,4 @@ ATT&CK tags are useful when they are specific. A tactic tag such as `attack.cred
 
 ## Useful next checks
 
-Future versions could check date format, duplicate rule IDs, or suspiciously broad wildcard conditions.
+Future versions could check duplicate rule IDs or suspiciously broad wildcard conditions.
