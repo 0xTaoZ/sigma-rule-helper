@@ -31,4 +31,4 @@ ATT&CK tags are useful when they are specific. A tactic tag such as `attack.cred
 
 ## Useful next checks
 
-Future versions could check duplicate rule IDs or suspiciously broad wildcard conditions.
+Future versions could check suspicious wildcard values inside detection selectors.

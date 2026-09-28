@@ -23,6 +23,7 @@ sigma-rule-helper check samples/
 ## What it checks
 
 - required top-level fields such as `title`, `id`, `status`, `logsource`, `detection`, and `level`
+- duplicate rule IDs across the checked files
 - Sigma-style `date` and `modified` values
 - basic detection shape
 - empty detection selectors

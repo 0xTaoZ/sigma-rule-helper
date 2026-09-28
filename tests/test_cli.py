@@ -3,7 +3,9 @@ from __future__ import annotations
 import contextlib
 import io
 import json
+import tempfile
 import unittest
+from pathlib import Path
 
 from sigma_rule_helper.cli import main
 
@@ -20,6 +22,39 @@ class CliTests(unittest.TestCase):
         self.assertEqual(payload["rules"][0]["title"], "Windows Failed Logon Spike")
         self.assertEqual(payload["rules"][0]["level"], "medium")
         self.assertEqual(payload["rules"][0]["attack_techniques"], ["attack.t1110"])
+
+    def test_check_reports_duplicate_rule_ids_across_files(self) -> None:
+        rule = """\
+title: Duplicate ID example
+id: 11111111-1111-4111-8111-111111111111
+status: test
+logsource:
+  product: linux
+detection:
+  selection:
+    event: login
+  condition: selection
+falsepositives:
+  - Lab traffic
+level: low
+"""
+        output = io.StringIO()
+
+        with tempfile.TemporaryDirectory() as directory:
+            first = Path(directory, "first.yml")
+            second = Path(directory, "second.yml")
+            first.write_text(rule, encoding="utf-8")
+            second.write_text(
+                rule.replace("Duplicate ID example", "Second rule"), encoding="utf-8"
+            )
+
+            with contextlib.redirect_stdout(output):
+                exit_code = main(["check", str(first), str(second)])
+
+        self.assertEqual(exit_code, 1)
+        self.assertEqual(output.getvalue().count("duplicate-rule-id"), 2)
+        self.assertIn("first.yml", output.getvalue())
+        self.assertIn("second.yml", output.getvalue())
 
 
 if __name__ == "__main__":
