@@ -8,6 +8,38 @@ from sigma_rule_helper.loader import LoadedRule
 
 
 class CheckRuleTests(unittest.TestCase):
+    def test_wildcard_only_values_report_selector_and_field(self) -> None:
+        for body, field in [
+            ({"Image": "*"}, "Image"),
+            ({"CommandLine|contains": ["cmd", "*?*"]}, "CommandLine|contains"),
+            ([{"User": "??"}], "User"),
+            (["normal", "**"], "keyword"),
+        ]:
+            with self.subTest(body=body):
+                rule = LoadedRule(Path("wildcard.yml"), {
+                    "detection": {"selection": body, "condition": "selection"}
+                })
+                findings = [f for f in check_rule(rule) if f.code == "wildcard-only-value"]
+                self.assertEqual(len(findings), 1)
+                self.assertEqual(findings[0].severity, "warning")
+                self.assertIn("selection", findings[0].message)
+                self.assertIn(field, findings[0].message)
+
+    def test_literal_and_specialized_values_do_not_warn(self) -> None:
+        for body in [
+            {"Image": ["*.exe", r"\*", r"\?", "", None, 42, " * "]},
+            {"Image|re": "*"},
+            {"Image|base64": "*"},
+            {"Image|exists": True},
+            {"Image|custom": "*"},
+            ["cmd*", r"\*"],
+        ]:
+            with self.subTest(body=body):
+                rule = LoadedRule(Path("literal.yml"), {
+                    "detection": {"selection": body, "condition": "selection"}
+                })
+                self.assertNotIn("wildcard-only-value", {f.code for f in check_rule(rule)})
+
     def test_valid_learning_rule_has_no_findings(self) -> None:
         rule = LoadedRule(
             path=Path("ok.yml"),

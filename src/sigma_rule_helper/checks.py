@@ -113,6 +113,7 @@ def _check_detection(detection: Any) -> list[Finding]:
                     f"detection selector should be a mapping or list: {selector}",
                 )
             )
+        findings.extend(_check_wildcard_values(selector_body, str(selector)))
     condition = detection["condition"]
     if isinstance(condition, str):
         if _uses_broad_them_condition(condition):
@@ -132,6 +133,30 @@ def _check_detection(detection: Any) -> list[Finding]:
                     f"condition references missing selector: {name}",
                 )
             )
+    return findings
+
+
+def _check_wildcard_values(body: Any, selector: str, field: str = "keyword") -> list[Finding]:
+    findings: list[Finding] = []
+    if isinstance(body, dict):
+        for key, value in body.items():
+            if not isinstance(key, str):
+                continue
+            modifiers = set(key.split("|")[1:])
+            if modifiers <= {"contains", "startswith", "endswith", "all", "cased"}:
+                findings.extend(_check_wildcard_values(value, selector, key))
+    elif isinstance(body, list):
+        for value in body:
+            findings.extend(_check_wildcard_values(value, selector, field))
+    elif isinstance(body, str) and re.fullmatch(r"[*?]+", body):
+        findings.append(
+            Finding(
+                "warning",
+                "wildcard-only-value",
+                f"selector {selector}, field {field} has a wildcard-only value: {body!r}; "
+                "review whether this match is intentionally broad",
+            )
+        )
     return findings
 
 

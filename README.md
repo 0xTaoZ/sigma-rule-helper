@@ -28,6 +28,7 @@ sigma-rule-helper check samples/
 - basic detection shape
 - empty detection selectors
 - selector bodies that are scalar values instead of mappings or lists
+- wildcard-only selector values such as `'*'` or `'??'`, with selector and field context
 - condition references to missing selectors
 - broad `1 of them` / `all of them` conditions that hide selector scope
 - missing or empty `falsepositives` notes

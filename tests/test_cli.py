@@ -11,6 +11,24 @@ from sigma_rule_helper.cli import main
 
 
 class CliTests(unittest.TestCase):
+    def test_wildcard_sample_warns_in_text_and_json(self) -> None:
+        for output_format in ("text", "json"):
+            with self.subTest(output_format=output_format):
+                output = io.StringIO()
+                with contextlib.redirect_stdout(output):
+                    exit_code = main([
+                        "check", "--format", output_format, "samples/wildcard_only.yml"
+                    ])
+                self.assertEqual(exit_code, 1)
+                if output_format == "json":
+                    findings = json.loads(output.getvalue())[0]["findings"]
+                    self.assertEqual(len(findings), 1)
+                    self.assertEqual(findings[0]["code"], "wildcard-only-value")
+                    self.assertEqual(findings[0]["severity"], "warning")
+                else:
+                    self.assertIn("warning: wildcard-only-value", output.getvalue())
+                    self.assertIn("selection, field Image", output.getvalue())
+
     def test_summary_json_output_is_machine_readable(self) -> None:
         output = io.StringIO()
 

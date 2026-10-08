@@ -1,0 +1,14 @@
+title: Broad Process Image Match
+id: 52d980e4-130e-41a6-ab19-b4d8239b90ca
+status: experimental
+description: Demonstrates a process selector that needs a more specific image value.
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    Image: '*'
+  condition: selection
+falsepositives:
+  - Any process with an image value can match
+level: low
