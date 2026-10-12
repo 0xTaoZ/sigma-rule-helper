@@ -11,6 +11,25 @@ from sigma_rule_helper.cli import main
 
 
 class CliTests(unittest.TestCase):
+    def test_condition_list_sample_reports_missing_selector(self) -> None:
+        for output_format in ("text", "json"):
+            with self.subTest(output_format=output_format):
+                output = io.StringIO()
+                with contextlib.redirect_stdout(output):
+                    exit_code = main([
+                        "check", "--format", output_format, "samples/condition_list.yml"
+                    ])
+                self.assertEqual(exit_code, 1)
+                if output_format == "json":
+                    findings = json.loads(output.getvalue())[0]["findings"]
+                    self.assertEqual(len(findings), 1)
+                    self.assertEqual(findings[0]["code"], "missing-condition-selector")
+                    self.assertEqual(findings[0]["severity"], "error")
+                    self.assertIn("filter_service", findings[0]["message"])
+                else:
+                    self.assertIn("error: missing-condition-selector", output.getvalue())
+                    self.assertIn("filter_service", output.getvalue())
+
     def test_wildcard_sample_warns_in_text_and_json(self) -> None:
         for output_format in ("text", "json"):
             with self.subTest(output_format=output_format):

@@ -8,6 +8,58 @@ from sigma_rule_helper.loader import LoadedRule
 
 
 class CheckRuleTests(unittest.TestCase):
+    def test_condition_list_checks_each_selector_reference(self) -> None:
+        rule = LoadedRule(Path("conditions.yml"), {
+            "detection": {
+                "selection_login": {"EventID": 4625},
+                "condition": ["selection_login", "1 of selection_*", "missing", "1 of filter_*"],
+            }
+        })
+        findings = [f for f in check_rule(rule) if f.code == "missing-condition-selector"]
+        self.assertEqual(len(findings), 2)
+        self.assertTrue(all(f.severity == "error" for f in findings))
+        self.assertIn("missing", findings[0].message)
+        self.assertIn("filter_*", findings[1].message)
+
+    def test_condition_list_warns_on_broad_scope(self) -> None:
+        rule = LoadedRule(Path("conditions.yml"), {
+            "detection": {"selection": {"EventID": 4625}, "condition": ["selection", "1 of them"]}
+        })
+        findings = [f for f in check_rule(rule) if f.code == "broad-condition"]
+        self.assertEqual(len(findings), 1)
+        self.assertEqual(findings[0].severity, "warning")
+
+    def test_invalid_condition_shapes_report_errors(self) -> None:
+        for condition in (None, 42, True, {}, [], "", "  ", ["selection", None],
+                          ["selection", 42], ["selection", {}], [["selection"]], ["selection", " "]):
+            with self.subTest(condition=condition):
+                rule = LoadedRule(Path("conditions.yml"), {
+                    "detection": {"selection": {"EventID": 4625}, "condition": condition}
+                })
+                findings = [f for f in check_rule(rule) if f.code == "bad-condition"]
+                self.assertEqual(len(findings), 1)
+                self.assertEqual(findings[0].severity, "error")
+
+    def test_malformed_entry_does_not_skip_remaining_conditions(self) -> None:
+        rule = LoadedRule(Path("conditions.yml"), {
+            "detection": {
+                "selection": {"EventID": 4625},
+                "condition": [None, "missing"],
+            }
+        })
+        codes = [f.code for f in check_rule(rule) if "condition" in f.code]
+        self.assertEqual(codes, ["bad-condition", "missing-condition-selector"])
+
+    def test_valid_condition_list_has_no_condition_findings(self) -> None:
+        rule = LoadedRule(Path("conditions.yml"), {
+            "detection": {
+                "selection_login": {"EventID": 4625},
+                "filter_admin": {"User": "admin"},
+                "condition": ["selection_login and not filter_admin", "1 of selection_*"],
+            }
+        })
+        self.assertEqual([f for f in check_rule(rule) if "condition" in f.code], [])
+
     def test_wildcard_only_values_report_selector_and_field(self) -> None:
         for body, field in [
             ({"Image": "*"}, "Image"),

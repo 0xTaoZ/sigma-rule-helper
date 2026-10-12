@@ -1,0 +1,16 @@
+title: Failed Logon Condition Alternatives
+id: 87fe71b7-d41c-42ef-9f69-4a27f4ae8925
+status: experimental
+description: Demonstrates an undefined filter in one condition alternative.
+logsource:
+  product: windows
+  service: security
+detection:
+  selection_failed:
+    EventID: 4625
+  condition:
+    - selection_failed
+    - selection_failed and not filter_service
+falsepositives:
+  - Mistyped passwords
+level: low

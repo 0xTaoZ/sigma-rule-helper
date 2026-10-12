@@ -115,8 +115,19 @@ def _check_detection(detection: Any) -> list[Finding]:
             )
         findings.extend(_check_wildcard_values(selector_body, str(selector)))
     condition = detection["condition"]
-    if isinstance(condition, str):
-        if _uses_broad_them_condition(condition):
+    conditions = condition if isinstance(condition, list) else [condition]
+    if not conditions:
+        findings.append(
+            Finding("error", "bad-condition", "condition list must not be empty")
+        )
+    known_selectors = {key for key in selectors if isinstance(key, str)}
+    for expression in conditions:
+        if not isinstance(expression, str) or not expression.strip():
+            findings.append(
+                Finding("error", "bad-condition", "condition must contain nonempty strings")
+            )
+            continue
+        if _uses_broad_them_condition(expression):
             findings.append(
                 Finding(
                     "warning",
@@ -124,8 +135,7 @@ def _check_detection(detection: Any) -> list[Finding]:
                     "condition uses 'them'; name selector prefixes for clearer scope",
                 )
             )
-        known_selectors = {key for key in selectors if isinstance(key, str)}
-        for name in _missing_condition_selectors(condition, known_selectors):
+        for name in _missing_condition_selectors(expression, known_selectors):
             findings.append(
                 Finding(
                     "error",
