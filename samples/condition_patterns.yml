@@ -1,0 +1,16 @@
+title: Failed Logon Selector Patterns
+id: 6fa71d74-f92c-4a61-a345-a1c39b26d61b
+status: experimental
+description: Demonstrates wildcard matching within selector names.
+logsource:
+  product: windows
+  service: security
+detection:
+  selection_failed_login:
+    EventID: 4625
+  condition:
+    - 1 of selection_*_login
+    - all of *_login
+falsepositives:
+  - Mistyped passwords
+level: low

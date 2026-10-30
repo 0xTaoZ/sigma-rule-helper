@@ -4,6 +4,7 @@ import re
 import uuid
 from dataclasses import dataclass
 from datetime import date, datetime
+from fnmatch import fnmatchcase
 from typing import Any
 
 from sigma_rule_helper.loader import LoadedRule
@@ -176,15 +177,8 @@ def _uses_broad_them_condition(condition: str) -> bool:
 
 def _missing_condition_selectors(condition: str, known_selectors: set[str]) -> list[str]:
     missing: list[str] = []
-    wildcard_prefixes = re.findall(r"\b([A-Za-z_][A-Za-z0-9_]*)\*", condition)
-    for prefix in wildcard_prefixes:
-        if not any(selector.startswith(prefix) for selector in known_selectors):
-            missing.append(f"{prefix}*")
-
     for name in _condition_selector_names(condition):
-        if name in known_selectors:
-            continue
-        if any(name == prefix for prefix in wildcard_prefixes):
+        if any(fnmatchcase(selector, name) for selector in known_selectors):
             continue
         if name not in missing:
             missing.append(name)
@@ -193,7 +187,7 @@ def _missing_condition_selectors(condition: str, known_selectors: set[str]) -> l
 
 def _condition_selector_names(condition: str) -> list[str]:
     names: list[str] = []
-    for token in re.findall(r"[A-Za-z_][A-Za-z0-9_]*", condition):
+    for token in re.findall(r"[A-Za-z_*][A-Za-z0-9_*]*", condition):
         if token.lower() in CONDITION_KEYWORDS:
             continue
         if token not in names:

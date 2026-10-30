@@ -11,6 +11,20 @@ from sigma_rule_helper.cli import main
 
 
 class CliTests(unittest.TestCase):
+    def test_condition_pattern_sample_has_no_findings(self) -> None:
+        for output_format in ("text", "json"):
+            with self.subTest(output_format=output_format):
+                output = io.StringIO()
+                with contextlib.redirect_stdout(output):
+                    exit_code = main([
+                        "check", "--format", output_format, "samples/condition_patterns.yml"
+                    ])
+                self.assertEqual(exit_code, 0)
+                if output_format == "json":
+                    self.assertEqual(json.loads(output.getvalue())[0]["findings"], [])
+                else:
+                    self.assertNotIn("missing-condition-selector", output.getvalue())
+
     def test_condition_list_sample_reports_missing_selector(self) -> None:
         for output_format in ("text", "json"):
             with self.subTest(output_format=output_format):

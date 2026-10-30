@@ -60,6 +60,34 @@ class CheckRuleTests(unittest.TestCase):
         })
         self.assertEqual([f for f in check_rule(rule) if "condition" in f.code], [])
 
+    def test_condition_patterns_match_complete_selector_names(self) -> None:
+        for pattern in ("selection_*_login", "*_login", "*login*", "selection**login", "*"):
+            with self.subTest(pattern=pattern):
+                rule = LoadedRule(Path("patterns.yml"), {
+                    "detection": {
+                        "selection_failed_login": {"EventID": 4625},
+                        "condition": [f"1 of {pattern}", f"all of {pattern}"],
+                    }
+                })
+                self.assertEqual(
+                    [f for f in check_rule(rule) if "condition" in f.code], []
+                )
+
+    def test_unmatched_condition_patterns_report_whole_pattern_once(self) -> None:
+        for pattern in ("selection_*_logout", "*_logout", "*logout*", "selection_*", "Selection*", "*lect"):
+            with self.subTest(pattern=pattern):
+                rule = LoadedRule(Path("patterns.yml"), {
+                    "detection": {
+                        "selection": {"EventID": 4625},
+                        "condition": f"1 of {pattern} or all of {pattern} and missing",
+                    }
+                })
+                findings = [f for f in check_rule(rule) if f.code == "missing-condition-selector"]
+                self.assertEqual([f.message for f in findings], [
+                    f"condition references missing selector: {pattern}",
+                    "condition references missing selector: missing",
+                ])
+
     def test_wildcard_only_values_report_selector_and_field(self) -> None:
         for body, field in [
             ({"Image": "*"}, "Image"),

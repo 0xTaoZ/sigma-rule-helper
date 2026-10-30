@@ -47,8 +47,16 @@ The checker does not estimate the selectivity of the complete condition.
 
 A condition can be a string or a nonempty list of strings. List entries are
 alternatives linked with OR. The checker reviews each entry for missing
-selectors (including wildcard prefixes) and broad `them` scope, using the same
+selectors (including wildcard patterns) and broad `them` scope, using the same
 checks as a single expression. Empty strings, non-string entries, and empty
 lists produce `bad-condition` errors; valid entries are still reviewed when
 another entry is malformed. These checks do not validate the full condition
 grammar or compile backend queries.
+
+Selector patterns support `*` at any position, as defined by the
+[Sigma condition specification](https://sigmahq.io/sigma-specification/specification/sigma-rules-specification.html#condition).
+For example, `1 of selection_*_login` matches `selection_failed_login`, and
+`all of *_login` matches selectors ending in `_login`. Matching uses the whole
+selector name and is case-sensitive. An unmatched pattern produces one
+`missing-condition-selector` error per expression, naming the complete pattern
+rather than its fragments. Literal selector references are still checked.

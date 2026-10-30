@@ -6,3 +6,4 @@ These rules are small teaching examples for the CLI.
 - `broken_rule.yml` is intentionally incomplete, including missing false-positive notes and malformed selectors, so the checker has something to report.
 - `wildcard_only.yml` has an intentionally broad image match and produces one `wildcard-only-value` warning. Run `sigma-rule-helper check samples/wildcard_only.yml` to review it; warnings return exit status 1.
 - `condition_list.yml` has two condition alternatives; the second references an undefined filter and produces one `missing-condition-selector` error. Run `sigma-rule-helper check samples/condition_list.yml`; errors return exit status 1.
+- `condition_patterns.yml` demonstrates infix and leading wildcard selector patterns and produces no findings. Run `sigma-rule-helper check samples/condition_patterns.yml`; valid patterns return exit status 0.
